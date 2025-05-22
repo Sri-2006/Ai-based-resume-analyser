@@ -1,0 +1,9 @@
+Flask
+flask-cors
+psycopg2
+docx2txt
+PyPDF2
+spacy
+gunicorn
+PyMuPDF
+ntlk

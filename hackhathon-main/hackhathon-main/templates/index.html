@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Resume Analyzer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 0.9s linear infinite;
+      margin: 1rem auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center font-sans px-4">
+  <div class="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-xl">
+    <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">🚀 AI Resume Analyzer</h1>
+    
+    <form id="upload-form" enctype="multipart/form-data" class="space-y-4">
+      <input type="file" name="resume" accept="application/pdf" required 
+             class="block w-full text-sm border rounded-lg p-3 border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+      
+      <button type="submit" 
+              class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-lg w-full text-lg font-semibold transition-all duration-300 ease-in-out">
+        🔍 Analyze Resume
+      </button>
+    </form>
+
+    <div id="loading" class="hidden text-center mt-6">
+      <div class="spinner"></div>
+      <p class="text-gray-600 mt-2">Analyzing resume... please wait.</p>
+    </div>
+
+    <div id="result" class="mt-8 hidden bg-gray-100 p-6 rounded-lg shadow-inner">
+      <h2 class="text-xl font-bold text-green-600 mb-2">✅ Analysis Result</h2>
+      <p><strong>Score:</strong> <span id="score" class="text-blue-600 font-semibold"></span></p>
+      <p class="mt-1"><strong>Skills Detected:</strong></p>
+      <ul id="skills" class="list-disc list-inside text-sm text-gray-800 mt-1"></ul>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("upload-form");
+    const loading = document.getElementById("loading");
+    const resultBox = document.getElementById("result");
+    const scoreEl = document.getElementById("score");
+    const skillsEl = document.getElementById("skills");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      loading.classList.remove("hidden");
+      resultBox.classList.add("hidden");
+
+      try {
+        const response = await fetch("/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        loading.classList.add("hidden");
+        resultBox.classList.remove("hidden");
+
+        scoreEl.textContent = data.score + " / 100";
+        skillsEl.innerHTML = data.skills.length
+          ? data.skills.map(skill => `<li>${skill}</li>`).join("")
+          : "<li>No matching skills found.</li>";
+      } catch (err) {
+        loading.innerHTML = "<p class='text-red-600 mt-2'>⚠️ Error analyzing resume.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
